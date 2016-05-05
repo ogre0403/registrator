@@ -105,3 +105,29 @@ func servicePort(container *dockerapi.Container, port dockerapi.Port, published 
 		container:         container,
 	}
 }
+
+func dummyServicePort(container *dockerapi.Container) ServicePort {
+	var hp, hip, ep, ept, eip string
+	hp = "0"
+	ep = "0"
+	hip = container.NetworkSettings.IPAddress
+	eip = container.NetworkSettings.IPAddress
+	if eip == "" {
+		for _, network := range container.NetworkSettings.Networks {
+			eip = network.IPAddress
+			hip = network.IPAddress
+		}
+	}
+	ept = "tcp"
+
+	return ServicePort{
+		HostPort:          hp,
+		HostIP:            hip,
+		ExposedPort:       ep,
+		ExposedIP:         eip,
+		PortType:          ept,
+		ContainerID:       container.ID,
+		ContainerHostname: container.Config.Hostname,
+		container:         container,
+	}
+}
