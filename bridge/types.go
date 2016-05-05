@@ -27,6 +27,7 @@ type Config struct {
 	RefreshInterval int
 	DeregisterCheck string
 	Cleanup         bool
+	NoPublishedPort	bool
 }
 
 type Service struct {

@@ -189,8 +189,13 @@ func (b *Bridge) add(containerId string, quiet bool) {
 	}
 
 	if len(ports) == 0 && !quiet {
-		log.Println("ignored:", container.ID[:12], "no published ports")
-		return
+		if b.config.NoPublishedPort == true {
+			// build a dummy ports map
+			ports["0"] = dummyServicePort(container)
+		} else {
+			log.Println("ignored:", container.ID[:12], "no published ports")
+			return
+		}
 	}
 
 	for _, port := range ports {
@@ -246,8 +251,14 @@ func (b *Bridge) newService(port ServicePort, isgroup bool) *Service {
 
 	service := new(Service)
 	service.Origin = port
-	service.ID = hostname + ":" + container.Name[1:] + ":" + port.ExposedPort
 	service.Name = mapDefault(metadata, "name", defaultName)
+	// if NoPublishedPort enable, service id is equal to serivce name
+	if b.config.NoPublishedPort == true {
+		service.ID = service.Name
+	} else {
+		service.ID = hostname + ":" + container.Name[1:] + ":" + port.ExposedPort
+	}
+
 	if isgroup && !metadataFromPort["name"] {
 		service.Name += "-" + port.ExposedPort
 	}
